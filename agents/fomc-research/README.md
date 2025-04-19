@@ -48,81 +48,101 @@ The agent architecture consists of a root agent that coordinates specialized sub
 * **add_continue_button**: Adds a UI button that allows users to continue the analysis without typing.
 
 ## Setup and Installation
-1.  **Prerequisites:**
 
-    **Google Cloud SDK and GCP Project:**
+### Quick Start
 
-    For the BigQuery setup and the Agent Engine deployment steps, you will need
-    a Google Cloud Project. Once you have created your project,
-    [install the Google Cloud SDK](https://cloud.google.com/sdk/docs/install).
-    Then run the following command to authenticate with your project:
-    ```bash
-    gcloud auth login
-    ```
-    You also need to enable certain APIs. Run the following command to enable
-    the required APIs:
-    ```bash
-    gcloud services enable aiplatform.googleapis.com
-    gcloud services enable bigquery.googleapis.com
-    ```
+1. **Set up Python environment**:
+   ```bash
+   python -m venv myenv
+   source myenv/bin/activate  # On Linux/Mac
+   # Or on Windows:
+   myenv\Scripts\activate
+   ```
 
-2.  **Installation:**
+2. **Copy the environment template**:
+   ```bash
+   cp .env-example .env
+   ```
 
-    Clone this repository and change to the repo directory:
-    ```
-    git clone https://github.com/google/adk-samples.git
-    cd adk-samples/agents/fomc-research
-    ```
+3. **Update the .env file** with your API keys and configuration:
+   - For **AWS Bedrock**: Add your AWS access keys and select a Claude model
+   - For **Google Vertex AI**: Add your GCP project details and select a Gemini model
 
-    Install [Poetry](https://python-poetry.org)
+4. **Configure authentication**:
+   - For AWS Bedrock:
+     ```bash
+     # AWS credentials are loaded from .env file
+     ```
+   - For Google Cloud:
+     ```bash
+     gcloud auth application-default login
+     gcloud services enable aiplatform.googleapis.com
+     gcloud services enable bigquery.googleapis.com
+     ```
 
-    If you have not installed poetry before, you can do so by running:
-    ```bash
-    pip install poetry
-    ```
+5. **Load environment variables**:
+   ```bash
+   # On Linux/Mac
+   chmod +x load_env.sh
+   ./load_env.sh
+   
+   # On Windows PowerShell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+   .\load_env.sh
+   ```
 
-    Install the FOMC Research agent requirements:
-    ```bash
-    poetry install
-    ```
+6. **Install dependencies**:
+   ```bash
+   # Install Poetry if needed
+   pip install poetry
+   
+   # Install all dependencies
+   poetry install
+   ```
 
-    This will also install the released version of 'google-adk', the Google Agent Development Kit.
+7. **Switch between models**: Edit your .env file and uncomment the desired model:
+   ```
+   # For AWS Bedrock (Claude)
+   AWS_GENAI_MODEL=us.anthropic.claude-3-sonnet-20240229-v1:0
+   # GOOGLE_GENAI_MODEL=gemini-2.0-flash-001
+   ```
+   Or for Google Vertex AI (Gemini):
+   ```
+   # AWS_GENAI_MODEL=us.anthropic.claude-3-sonnet-20240229-v1:0
+   GOOGLE_GENAI_MODEL=gemini-2.0-flash-001
+   ```
 
-3.  **Configuration:**
+### Additional Configuration
 
-    **Environment:**
+**For Google Cloud Deployment (Optional):**
 
-    There is a `.env-example` file included in the repository. Update this file
-    with the values appropriate to your project, and save it as `.env`. The values
-    in this file will be read into the environment of your application.
+If you plan to deploy the agent to Google Agent Engine, you'll need additional setup:
 
-    Once you have created your `.env` file, if you're using the `bash` shell,
-    run the following command to export the variables from the `.env` file into your
-    local shell environment:
-    ```bash
-    set -o allexport
-    . .env
-    set +o allexport
-    ```
-    If you aren't using `bash`, you may need to export the variables manually.
+1. [Install the Google Cloud SDK](https://cloud.google.com/sdk/docs/install) and authenticate:
+   ```bash
+   gcloud auth login
+   ```
 
-    **BigQuery Setup:**
+2. For BigQuery integration, set up permissions for the Reasoning Engine Service Agent:
+   ```bash
+   export RE_SA="service-${GOOGLE_CLOUD_PROJECT_NUMBER}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+   gcloud projects add-iam-policy-binding ${GOOGLE_CLOUD_PROJECT} \
+       --member="serviceAccount:${RE_SA}" \
+       --condition=None \
+       --role="roles/bigquery.user"
+   gcloud projects add-iam-policy-binding ${GOOGLE_CLOUD_PROJECT} \
+       --member="serviceAccount:${RE_SA}" \
+       --condition=None \
+       --role="roles/bigquery.dataViewer"
+   ```
 
-    You need to create a BigQuery table containing the Fed Futures pricing data.
-
-    The FOMC Research Agent repo contains a sample data file
-    (`sample_timeseries_data.csv`) with data covering the FOMC meetings on Jan
-    29 and Mar 19 2025. If you want to run the agent for other FOMC meetings you
-    will need to get additional data.
-
-    To install this data file in a BigQuery table in your project, run the following
-    commands in the `fomc-research/deployment` directory:
-    ```bash
-    python bigquery_setup.py --project_id=$GOOGLE_CLOUD_PROJECT \
-        --dataset_id=$GOOGLE_CLOUD_BQ_DATASET \
-        --location=$GOOGLE_CLOUD_LOCATION \
-        --data_file=sample_timeseries_data.csv
-    ```
+3. If you want to use the sample data for testing:
+   ```bash
+   python bigquery_setup.py --project_id=$GOOGLE_CLOUD_PROJECT \
+       --dataset_id=$GOOGLE_CLOUD_BQ_DATASET \
+       --location=$GOOGLE_CLOUD_LOCATION \
+       --data_file=sample_timeseries_data.csv
+   ```
 
 ## Running the Agent
 
