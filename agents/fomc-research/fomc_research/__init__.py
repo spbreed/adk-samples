@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Initialization functions for FOMC Research Agent."""
+"""Initialization functions for Real Estate Investment Analysis Agent."""
 
 import logging
 import os
@@ -24,9 +24,8 @@ if not isinstance(numeric_level, int):
 logger = logging.getLogger(__package__)
 logger.setLevel(numeric_level)
 
-MODEL = os.getenv("GOOGLE_GENAI_MODEL")
-if not MODEL:
-    MODEL = "gemini-1.5-flash-002"
+# Import config module first
+from . import config
 
-# MODEL needs to be defined before this import
-from . import agent  # pylint: disable=wrong-import-position
+# Then import agent module
+from . import agent

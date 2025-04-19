@@ -12,29 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Analyze real estate investments based on ESG and geopolitical factors."""
+"""Market Data Analyst agent for Real Estate Investment Analysis Agent."""
 
 from google.adk.agents import Agent
-from google.adk.models.lite_llm import LiteLlm
 
-from ..config import LITELLM_MODEL
+from ..agent import MODEL
 from ..shared_libraries.callbacks import rate_limit_callback, add_continue_button
-from . import analysis_agent_prompt
-from .esg_analyst_agent import ESGAnalystAgent
-from .geopolitical_agent import GeopoliticalAgent
-from .market_data_agent import MarketDataAgent
+from ..tools.store_state import store_state_tool
+from . import market_data_analyst_agent_prompt
 
-AnalysisAgent = Agent(
-    model=LiteLlm(model=LITELLM_MODEL),
-    name="analysis_agent",
+MarketDataAnalystAgent = Agent(
+    model=MODEL,
+    name="market_data_analyst_agent",
     description=(
-        "Analyze real estate investment opportunities using all three analytical perspectives: market data, ESG factors, and geopolitical considerations."
+        "Analyze real estate market data including property prices and trends for specific locations."
     ),
-    instruction=analysis_agent_prompt.PROMPT,
-    sub_agents=[
-        ESGAnalystAgent,
-        GeopoliticalAgent,
-        MarketDataAgent,
+    instruction=market_data_analyst_agent_prompt.PROMPT,
+    tools=[
+        store_state_tool,
     ],
     before_model_callback=rate_limit_callback,
     after_model_callback=add_continue_button,

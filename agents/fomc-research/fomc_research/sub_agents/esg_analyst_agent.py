@@ -12,35 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Real Estate Investment Analysis Agent."""
-
-import logging
-import warnings
+"""ESG Analyst agent for FOMC Research Agent."""
 
 from google.adk.agents import Agent
 from google.adk.models.lite_llm import LiteLlm
 
-from . import root_agent_prompt
-from .config import LITELLM_MODEL
-from .shared_libraries.callbacks import rate_limit_callback, add_continue_button
-from .sub_agents.analysis_agent import AnalysisAgent
-from .tools.store_state import store_state_tool
+from ..config import LITELLM_MODEL
+from ..shared_libraries.callbacks import rate_limit_callback, add_continue_button
+from ..tools.store_state import store_state_tool
+from . import esg_analyst_agent_prompt
 
-warnings.filterwarnings("ignore", category=UserWarning, module=".*pydantic.*")
-
-logger = logging.getLogger(__name__)
-
-root_agent = Agent(
+ESGAnalystAgent = Agent(
     model=LiteLlm(model=LITELLM_MODEL),
-    name="root_agent",
+    name="esg_analyst_agent",
     description=(
-        "Use tools and other agents provided to generate an analysis report "
-        "for real estate investors based on ESG and geopolitical factors."
+        "Analyze ESG (Environmental, Social, Governance) factors for real estate investments, considering organizations and locations."
     ),
-    instruction=root_agent_prompt.PROMPT,
-    tools=[store_state_tool],
-    sub_agents=[
-        AnalysisAgent,
+    instruction=esg_analyst_agent_prompt.PROMPT,
+    tools=[
+        store_state_tool,
     ],
     before_model_callback=rate_limit_callback,
     after_model_callback=add_continue_button,

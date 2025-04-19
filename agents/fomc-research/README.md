@@ -1,67 +1,51 @@
-#  FOMC Research Agent
+#  Real Estate Investment Analysis Agent
 
-The FOMC Research Agent uses a multi-agent, multi-modal architecture, combined
-with tool use, live web access and external database integration to generate a
-detailed analysis report on the latest meeting of the Federal Open Market
-Committee. This agent showcases a multi-stage, non-conversational agentic
-workflow as opposed to a conversational user interaction.
+The Real Estate Investment Analysis Agent uses a multi-agent architecture to generate
+detailed analysis reports for real estate investors based on market data, ESG (Environmental, Social, and Governance) 
+factors, and geopolitical considerations for specific locations and organizations. This agent 
+provides location-specific insights to support informed investment decisions.
 
 ## Overview
 
-The Federal Open Market Committee (FOMC) is the body of the United States
-government responsible for setting interest rate policy. Statements and
-press releases from the FOMC meetings are closely watched and thoroughly
-analyzed by financial market participants around the world.
+Investors increasingly consider historical market performance, ESG and geopolitical factors when making real estate investment 
+decisions. These factors can significantly impact property values, development opportunities, 
+rental income potential, and overall investment risk.
 
-This agent shows how a multi-agent architecture might be used to generate
-detailed analysis reports on financial market events such as Fed meetings. The
-FOMC Research Agent is slightly different from other agents in that it is
-largely non-conversational -- most of the agent's work takes place through
-back-and-forth interactions between individual sub-agents. When necessary,
-it asks the user for a key piece of information, but in general it functions
-without human interaction.
-
-This is the high-level workflow the agent follows to generate its analysis (note
-that step 3, "Review press conference video", is still in development).
-![FOMC Research agent workflow](<FOMC_Research_Agent_Workflow.png>)
+This agent demonstrates how a multi-agent architecture can be used to generate comprehensive 
+real estate investment analysis reports. The agent collects information about a specific location 
+(zipcode or address) and relevant organizations, then leverages specialized sub-agents to analyze 
+historical price trends, ESG factors, and geopolitical considerations before synthesizing a final investment recommendation.
 
 ## Agent Details
-The key features of the FOMC Research Agent include:
+The key features of the Real Estate Investment Analysis Agent include:
 
 | Feature | Description |
 | --- | --- |
 | *Interaction Type* | Workflow |
 | *Complexity* | Advanced |
 | *Agent Type* | Multi Agent |
-| *Components* | Tools, Multimodal, AgentTools |
-| *Vertical* | Financial Services |
+| *Components* | Tools, AgentTools |
+| *Vertical* | Real Estate Investment |
 
 ### Agent Architecture
 
-This diagram shows the detailed architecture of the agents and tools used
-to implement this workflow.
-![FOMC Research agent architecture](<fomc-research.svg>)
+The agent architecture consists of a root agent that coordinates specialized sub-agents working through the analysis agent:
 
 ### Key Features
 
 ##### Agents
-* **root_agent:** Entry point for the agent workflow. Coordinates the activity of the other agents.
-* **research_agent:** Coordinates the retrieval of individual research components.
-* **analysis_agent:** Takes in the output of the `research_agent` and generates the analysis report.
-* **retrieve_meeting_data_agent:** Fetches FOMC meeting data from the web.
-* **extract_page_data_agent:** Extracts specific data from an HTML page.
-* **summarize_meeting_agent:** Reads the meeting transcript and generates a summary.
+* **root_agent:** Entry point for the agent workflow. Collects location and organization information from the user and coordinates the analysis.
+* **analysis_agent:** Coordinates the specialized analysis sub-agents and synthesizes their findings into a comprehensive investment recommendation.
+* **market_data_agent:** Analyzes historical real estate price trends and market metrics for the specified location over the past 5 years, providing data on appreciation rates, market cycles, and future projections.
+* **esg_analyst_agent:** Analyzes ESG (Environmental, Social, and Governance) factors related to the specified location and organizations, focusing on sustainability metrics, green building certifications, community initiatives, and governance practices relevant to real estate investment.
+* **geopolitical_agent:** Evaluates local and regional political developments, regulatory environments, demographic trends, and economic factors that could impact real estate investments in the specified location.
 
 ##### Tools
-* **fetch_page_tool**: Encapsulates an HTTP request for retrieving a web page.
-* **store_state_tool**: Stores specific information in the ToolContext.
-* **analyze_video_tool**: Processes and analyzes a YouTube video.
-* **compute_probability_tool**: Computes the probability of rate changes from Fed Futures pricing.
-* **compare_statements**: Compares the current and previous FOMC statements.
-* **fetch_transcript**: Retrieves the FOMC meeting transcript.
+* **store_state_tool**: Stores location and organization information in the ToolContext.
 
 ##### Callbacks
 * **rate_limit_callback**: Implements request rate limiting to minimize `429: Resource Exhausted` errors.
+* **add_continue_button**: Adds a UI button that allows users to continue the analysis without typing.
 
 ## Setup and Installation
 1.  **Prerequisites:**
@@ -176,8 +160,7 @@ tail -f fomc_research_log.txt
 
 ### Example Interaction
 
-Begin the interaction by typing "Hello. What can you do for me?". After
-the first prompt, give the date: "2025-01-29".
+Begin the interaction by typing "Hello. What can you do for me?". After the first prompt, provide the location and organizations you want to analyze.
 
 The interaction will look something like this:
 ```
@@ -186,13 +169,37 @@ Log setup complete: /tmp/agents_log/agent.20250405_140937.log
 To access latest log: tail -F /tmp/agents_log/agent.latest.log
 Running agent root_agent, type exit to exit.
 user: Hello. What can you do for me?
-[root_agent]: I can help you analyze past Fed Open Market Committee (FOMC) meetings and provide you with a thorough analysis report. To start, please provide the date of the meeting you would like to analyze. If you have already provided it, please confirm the date. I need the date in ISO format (YYYY-MM-DD).
+[root_agent]: I can help you analyze real estate investment opportunities based on market data, ESG (Environmental, Social, and Governance) factors, and geopolitical considerations. To start, please provide the location (zipcode or address) you're interested in investing in, as well as any specific organizations or companies in that area you'd like me to analyze.
 
-user: 2025-01-29
-[analysis_agent]: Here is a summary and analysis of the January 29, 2025 FOMC meeting, based on the available information:
-...
+user: I'm interested in investing in Austin, TX 78701 downtown area. Please analyze properties near Oracle, Tesla, and Google offices.
+[analysis_agent]: I'll analyze real estate investment opportunities in downtown Austin, TX (78701) near Oracle, Tesla, and Google offices. First, I need to gather information about ESG factors for these organizations and the geopolitical considerations for this location, as well as analyze market data for this area. I'll proceed step by step with all three analyses.
+
+[Continue Analysis]
+
+[esg_analyst_agent]: I'm analyzing the ESG (Environmental, Social, and Governance) factors for the downtown Austin area (78701) and the specified organizations (Oracle, Tesla, and Google)...
+
+[Continue Analysis]
+
+[geopolitical_agent]: I'm evaluating the local political landscape, economic development factors, demographic trends, and regulatory environment in downtown Austin...
+
+[Continue Analysis]
+
+[market_data_agent]: I'm analyzing the real estate market trends for downtown Austin, TX (78701) over the past 5 years, including price appreciation, rental yields, and future projections...
+
+[Continue Analysis]
+
+[analysis_agent]: Here is my real estate investment analysis for downtown Austin, TX (78701), focusing on properties near Oracle, Tesla, and Google offices:
+
+[Comprehensive report with sections on market data, ESG factors, and geopolitical considerations]
+
+Summary of Analyses:
+- Market Data Analysis: Downtown Austin has experienced a 42% price appreciation over the past 5 years with an average annual return of 7.2%. The market shows strong rental yields of 4.8% with projected continued growth due to tech sector expansion.
+- ESG Analysis: All three companies demonstrate strong sustainability commitments, with Google achieving carbon neutrality and Tesla's focus on renewable energy creating positive neighborhood impacts. Oracle's community investment programs have enhanced local infrastructure.
+- Geopolitical Analysis: Austin's business-friendly policies, strong tech sector growth, and infrastructure investments create a stable environment for real estate appreciation, though recent regulatory changes regarding short-term rentals should be monitored.
+
+Based on the integration of these analyses, properties in downtown Austin near these tech campuses represent a strong investment opportunity with both appreciation and rental income potential...
 ```
-If the agent stops before completing the analysis, try asking it to continue.
+Note that in the interaction above, the [Continue Analysis] buttons allow the user to progress through the analysis without typing commands like "please continue" or "go on."
 
 ## Deployment on Vertex AI Agent Engine
 
